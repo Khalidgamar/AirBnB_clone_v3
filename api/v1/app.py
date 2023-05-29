@@ -1,73 +1,73 @@
 #!/usr/bin/python3
-"""make api"""
+"""
+A python script that starts a Flask web application
+"""
+from flask import Flask, Blueprint, abort, jsonify
 from models import storage
-from os import getenv
 from api.v1.views import app_views
-from flask import Flask, make_response, jsonify
+from os import getenv
 from flask_cors import CORS
 
+
 app = Flask(__name__)
-app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+app.url_map.strict_slashes = False
 app.register_blueprint(app_views)
-
-cors = CORS(app, resources={"/*": {"origins": "0.0.0.0"}})
-
-
-@app.teardown_appcontext
-def teardown_appcontext(self):
-    """teardown method"""
-    storage.close()
+CORS(app, resources={r"/*": {"origins": "0.0.0.0"}})
 
 
 @app.errorhandler(404)
-def page_not_found(e):
-    """404 error handler
-
-    args:
-        error status
-    return:
-        json error response
+def page_not_found(error):
     """
-    return make_response(jsonify({'error': 'Not found'}), 404)
-
-
-if __name__ == "__main__":
-    host = getenv('HBNB_API_HOST', '0.0.0.0')
-    port = int(getenv('HBNB_API_PORT', '5000'))
-    app.run(host, port, threaded=True)#!/usr/bin/python3
-"""make api"""
-from models import storage
-from os import getenv
-from api.v1.views import app_views
-from flask import Flask, make_response, jsonify
-from flask_cors import CORS
-
-app = Flask(__name__)
-app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-app.register_blueprint(app_views)
-
-cors = CORS(app, resources={"/*": {"origins": "0.0.0.0"}})
+    Function that shows a 404 error
+    """
+    return (jsonify(error="Not found"), 404)
 
 
 @app.teardown_appcontext
-def teardown_appcontext(self):
-    """teardown method"""
+def teardown(exception=None):
+    """
+     Function closes the current session
+    """
     storage.close()
 
 
+if __name__ == '__main__':
+    h = getenv('HBNB_API_HOST')
+    p = getenv('HBNB_API_PORT')
+    app.run(host=h, port=p, threaded=True)#!/usr/bin/python3
+"""
+A python script that starts a Flask web application
+"""
+from flask import Flask, Blueprint, abort, jsonify
+from models import storage
+from api.v1.views import app_views
+from os import getenv
+from flask_cors import CORS
+
+
+app = Flask(__name__)
+app.url_map.strict_slashes = False
+app.register_blueprint(app_views)
+CORS(app, resources={r"/*": {"origins": "0.0.0.0"}})
+
+
 @app.errorhandler(404)
-def page_not_found(e):
-    """404 error handler
-
-    args:
-        error status
-    return:
-        json error response
+def page_not_found(error):
     """
-    return make_response(jsonify({'error': 'Not found'}), 404)
+    Function that shows a 404 error
+    """
+    return (jsonify(error="Not found"), 404)
 
 
-if __name__ == "__main__":
-    host = getenv('HBNB_API_HOST', '0.0.0.0')
-    port = int(getenv('HBNB_API_PORT', '5000'))
-    app.run(host, port, threaded=True)
+@app.teardown_appcontext
+def teardown(exception=None):
+    """
+     Function closes the current session
+    """
+    storage.close()
+
+
+if __name__ == '__main__':
+    h = getenv('HBNB_API_HOST')
+    p = getenv('HBNB_API_PORT')
+    app.run(host=h, port=p, threaded=True)

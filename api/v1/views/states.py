@@ -1,223 +1,147 @@
 #!/usr/bin/python3
-""" Flask routes for `State` object related URI subpaths using the `app_views`
-Blueprint.
+""" State APIRest
 """
-from api.v1.views import app_views
-from flask import Flask, jsonify, abort, request
+
 from models import storage
 from models.state import State
-
-
-@app_views.route("/states", methods=['GET'],
-                 strict_slashes=False)
-def GET_all_State():
-    """ Returns JSON list of all `State` instances in storage
-
-    Return:
-        JSON list of all `State` instances
-    """
-    state_list = []
-    for state in storage.all(State).values():
-        state_list.append(state.to_dict())
-
-    return jsonify(state_list)
-
-
-@app_views.route("/states/<state_id>", methods=['GET'],
-                 strict_slashes=False)
-def GET_State(state_id):
-    """ Returns `State` instance in storage by id in URI subpath
-
-    Args:
-        state_id: uuid of `State` instance in storage
-
-    Return:
-        `State` instance with corresponding uuid, or 404 response
-    on error
-    """
-    state = storage.get(State, state_id)
-
-    if state:
-        return jsonify(state.to_dict())
-    else:
-        abort(404)
-
-
-@app_views.route("/states/<state_id>", methods=['DELETE'],
-                 strict_slashes=False)
-def DELETE_State(state_id):
-    """ Deletes `State` instance in storage by id in URI subpath
-
-    Args:
-        state_id: uuid of `State` instance in storage
-
-    Return:
-        Empty dictionary and response status 200, or 404 response
-    on error
-    """
-    state = storage.get(State, state_id)
-
-    if state:
-        storage.delete(state)
-        storage.save()
-        return ({})
-    else:
-        abort(404)
-
-
-@app_views.route('/states', methods=['POST'], strict_slashes=False)
-def POST_State():
-    """ Creates new `State` instance in storage
-
-    Return:
-        Empty dictionary and response status 200, or 404 response
-    on error
-    """
-    req_dict = request.get_json()
-    if not req_dict:
-        return (jsonify({'error': 'Not a JSON'}), 400)
-    elif 'name' not in req_dict:
-        return (jsonify({'error': 'Missing name'}), 400)
-    new_State = State(**req_dict)
-    new_State.save()
-
-    return (jsonify(new_State.to_dict()), 201)
-
-
-@app_views.route("/states/<state_id>", methods=['PUT'],
-                 strict_slashes=False)
-def PUT_State(state_id):
-    """ Updates `State` instance in storage by id in URI subpath, with
-    kwargs from HTTP body request JSON dict
-
-    Args:
-        state_id: uuid of `State` instance in storage
-
-    Return:
-        Empty dictionary and response status 200, or 404 response
-    on error
-    """
-    state = storage.get(State, state_id)
-    req_dict = request.get_json()
-
-    if state:
-        if not req_dict:
-            return (jsonify({'error': 'Not a JSON'}), 400)
-        for key, value in req_dict.items():
-            if key not in ['id', 'created_at', 'updated_at']:
-                setattr(state, key, value)
-        storage.save()
-        return (jsonify(state.to_dict()))
-    else:
-        abort(404)#!/usr/bin/python3
-""" Flask routes for `State` object related URI subpaths using the `app_views`
-Blueprint.
-"""
 from api.v1.views import app_views
-from flask import Flask, jsonify, abort, request
+from flask import jsonify, abort, request
+
+
+@app_views.route('/states', methods=['GET'])
+def list_dict():
+    """ list of an objetc in a dict form
+    """
+    lista = []
+    dic = storage.all('State')
+    for elem in dic:
+        lista.append(dic[elem].to_dict())
+    return (jsonify(lista))
+
+
+@app_views.route('/states/<state_id>', methods=['GET', 'DELETE'])
+def state_id(state_id):
+    """ realize the specific action depending on method
+    """
+    lista = []
+    dic = storage.all('State')
+    for elem in dic:
+        var = dic[elem].to_dict()
+        if var["id"] == state_id:
+            if request.method == 'GET':
+                return (jsonify(var))
+            elif request.method == 'DELETE':
+                aux = {}
+                dic[elem].delete()
+                storage.save()
+                return (jsonify(aux))
+    abort(404)
+
+
+@app_views.route('/states', methods=['POST'])
+def add_item():
+    """ add a new item
+    """
+    if not request.json:
+        return jsonify("Not a JSON"), 400
+    else:
+        content = request.get_json()
+        if "name" not in content.keys():
+            return jsonify("Missing name"), 400
+        else:
+            new_state = State(**content)
+            new_state.save()
+            return (jsonify(new_state.to_dict()), 201)
+
+
+@app_views.route('/states/<state_id>', methods=['PUT'])
+def update_item(state_id):
+    """ update item
+    """
+    dic = storage.all("State")
+    for key in dic:
+        if dic[key].id == state_id:
+            if not request.json:
+                return jsonify("Not a JSON"), 400
+            else:
+                forbidden = ["id", "update_at", "created_at"]
+                content = request.get_json()
+                for k in content:
+                    if k not in forbidden:
+                        setattr(dic[key], k, content[k])
+                dic[key].save()
+                return(jsonify(dic[key].to_dict()))
+    abort(404)#!/usr/bin/python3
+""" State APIRest
+"""
+
 from models import storage
 from models.state import State
+from api.v1.views import app_views
+from flask import jsonify, abort, request
 
 
-@app_views.route("/states", methods=['GET'],
-                 strict_slashes=False)
-def GET_all_State():
-    """ Returns JSON list of all `State` instances in storage
-
-    Return:
-        JSON list of all `State` instances
+@app_views.route('/states', methods=['GET'])
+def list_dict():
+    """ list of an objetc in a dict form
     """
-    state_list = []
-    for state in storage.all(State).values():
-        state_list.append(state.to_dict())
+    lista = []
+    dic = storage.all('State')
+    for elem in dic:
+        lista.append(dic[elem].to_dict())
+    return (jsonify(lista))
 
-    return jsonify(state_list)
 
-
-@app_views.route("/states/<state_id>", methods=['GET'],
-                 strict_slashes=False)
-def GET_State(state_id):
-    """ Returns `State` instance in storage by id in URI subpath
-
-    Args:
-        state_id: uuid of `State` instance in storage
-
-    Return:
-        `State` instance with corresponding uuid, or 404 response
-    on error
+@app_views.route('/states/<state_id>', methods=['GET', 'DELETE'])
+def state_id(state_id):
+    """ realize the specific action depending on method
     """
-    state = storage.get(State, state_id)
+    lista = []
+    dic = storage.all('State')
+    for elem in dic:
+        var = dic[elem].to_dict()
+        if var["id"] == state_id:
+            if request.method == 'GET':
+                return (jsonify(var))
+            elif request.method == 'DELETE':
+                aux = {}
+                dic[elem].delete()
+                storage.save()
+                return (jsonify(aux))
+    abort(404)
 
-    if state:
-        return jsonify(state.to_dict())
+
+@app_views.route('/states', methods=['POST'])
+def add_item():
+    """ add a new item
+    """
+    if not request.json:
+        return jsonify("Not a JSON"), 400
     else:
-        abort(404)
+        content = request.get_json()
+        if "name" not in content.keys():
+            return jsonify("Missing name"), 400
+        else:
+            new_state = State(**content)
+            new_state.save()
+            return (jsonify(new_state.to_dict()), 201)
 
 
-@app_views.route("/states/<state_id>", methods=['DELETE'],
-                 strict_slashes=False)
-def DELETE_State(state_id):
-    """ Deletes `State` instance in storage by id in URI subpath
-
-    Args:
-        state_id: uuid of `State` instance in storage
-
-    Return:
-        Empty dictionary and response status 200, or 404 response
-    on error
+@app_views.route('/states/<state_id>', methods=['PUT'])
+def update_item(state_id):
+    """ update item
     """
-    state = storage.get(State, state_id)
-
-    if state:
-        storage.delete(state)
-        storage.save()
-        return ({})
-    else:
-        abort(404)
-
-
-@app_views.route('/states', methods=['POST'], strict_slashes=False)
-def POST_State():
-    """ Creates new `State` instance in storage
-
-    Return:
-        Empty dictionary and response status 200, or 404 response
-    on error
-    """
-    req_dict = request.get_json()
-    if not req_dict:
-        return (jsonify({'error': 'Not a JSON'}), 400)
-    elif 'name' not in req_dict:
-        return (jsonify({'error': 'Missing name'}), 400)
-    new_State = State(**req_dict)
-    new_State.save()
-
-    return (jsonify(new_State.to_dict()), 201)
-
-
-@app_views.route("/states/<state_id>", methods=['PUT'],
-                 strict_slashes=False)
-def PUT_State(state_id):
-    """ Updates `State` instance in storage by id in URI subpath, with
-    kwargs from HTTP body request JSON dict
-
-    Args:
-        state_id: uuid of `State` instance in storage
-
-    Return:
-        Empty dictionary and response status 200, or 404 response
-    on error
-    """
-    state = storage.get(State, state_id)
-    req_dict = request.get_json()
-
-    if state:
-        if not req_dict:
-            return (jsonify({'error': 'Not a JSON'}), 400)
-        for key, value in req_dict.items():
-            if key not in ['id', 'created_at', 'updated_at']:
-                setattr(state, key, value)
-        storage.save()
-        return (jsonify(state.to_dict()))
-    else:
-        abort(404)
+    dic = storage.all("State")
+    for key in dic:
+        if dic[key].id == state_id:
+            if not request.json:
+                return jsonify("Not a JSON"), 400
+            else:
+                forbidden = ["id", "update_at", "created_at"]
+                content = request.get_json()
+                for k in content:
+                    if k not in forbidden:
+                        setattr(dic[key], k, content[k])
+                dic[key].save()
+                return(jsonify(dic[key].to_dict()))
+    abort(404)

@@ -55,7 +55,7 @@ class FileStorage:
                 jo = json.load(f)
             for key in jo:
                 self.__objects[key] = classes[jo[key]["__class__"]](**jo[key])
-        except:
+        except BaseException:
             pass
 
     def delete(self, obj=None):
@@ -70,25 +70,23 @@ class FileStorage:
         self.reload()
 
     def get(self, cls, id):
-        """get class ob by id, using dict's get()
-            args:
-                cls -str(): class name to get
-                id  -str(): instance id to get
-            returns:
-                class object instance
-        """
-        if cls in classes.values() and id and type(id) == str:
-            return self.__objects.get(cls.__name__ + '.' + id, None)
+        """Retrieve an object"""
+        if cls is not None and type(cls) is str and id is not None and \
+                type(id) is str and cls in classes:
+            key = cls + '.' + id
+            obj = self.__objects.get(key, None)
+            return obj
+        else:
+            return None
 
     def count(self, cls=None):
-        """get count of objects, by class or all
-            args:
-                cls=class we want to count
-            returns
-                number of instances if class given, else number of db entries
-            total.
-        """
-        return len(self.all(cls))#!/usr/bin/python3
+        """Count number of objects in storage"""
+        total = 0
+        if type(cls) == str and cls in classes:
+            total = len(self.all(cls))
+        elif cls is None:
+            total = len(self.__objects)
+        return total#!/usr/bin/python3
 """
 Contains the FileStorage class
 """
@@ -145,7 +143,7 @@ class FileStorage:
                 jo = json.load(f)
             for key in jo:
                 self.__objects[key] = classes[jo[key]["__class__"]](**jo[key])
-        except:
+        except BaseException:
             pass
 
     def delete(self, obj=None):
@@ -160,22 +158,20 @@ class FileStorage:
         self.reload()
 
     def get(self, cls, id):
-        """get class ob by id, using dict's get()
-            args:
-                cls -str(): class name to get
-                id  -str(): instance id to get
-            returns:
-                class object instance
-        """
-        if cls in classes.values() and id and type(id) == str:
-            return self.__objects.get(cls.__name__ + '.' + id, None)
+        """Retrieve an object"""
+        if cls is not None and type(cls) is str and id is not None and \
+                type(id) is str and cls in classes:
+            key = cls + '.' + id
+            obj = self.__objects.get(key, None)
+            return obj
+        else:
+            return None
 
     def count(self, cls=None):
-        """get count of objects, by class or all
-            args:
-                cls=class we want to count
-            returns
-                number of instances if class given, else number of db entries
-            total.
-        """
-        return len(self.all(cls))
+        """Count number of objects in storage"""
+        total = 0
+        if type(cls) == str and cls in classes:
+            total = len(self.all(cls))
+        elif cls is None:
+            total = len(self.__objects)
+        return total

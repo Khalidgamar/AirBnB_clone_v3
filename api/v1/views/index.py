@@ -1,69 +1,55 @@
 #!/usr/bin/python3
-"""index of views"""
+"""Creationg route for Blueprint
+"""
 from api.v1.views import app_views
-from flask import jsonify
 from models import storage
-from models.amenity import Amenity
-from models.city import City
-from models.place import Place
-from models.review import Review
-from models.state import State
-from models.user import User
-from collections import OrderedDict
-
-class_plurals = {'amenities': Amenity, 'cities': City, 'places': Place,
-                 'reviews': Review, 'states': State, 'users': User}
+from flask import jsonify
 
 
-@app_views.route('/status', strict_slashes=False)
-def status():
-    """status of api v1"""
-    status = {"status": "OK"}
-    return jsonify(status)
-
-
-@app_views.route('/stats', strict_slashes=False)
-def stats():
-    """ Returns itemized count of objects in storage by class
-
+@app_views.route('/status')
+def response():
+    """ get status ok
     """
-    stats = OrderedDict()
-    for key in sorted(class_plurals.keys()):
-        count = storage.count(class_plurals[key])
-        if count > 0:
-            stats[key] = count
-    return jsonify(stats)#!/usr/bin/python3
-"""index of views"""
+    dic = {"status": "OK"}
+    return jsonify(dic)
+
+
+@app_views.route('/stats')
+def class_counter():
+    """ get a dictionary from count method
+    """
+    dic = {}
+    dic["amenities"] = storage.count("Amenity")
+    dic["cities"] = storage.count("City")
+    dic["places"] = storage.count("Place")
+    dic["reviews"] = storage.count("Review")
+    dic["states"] = storage.count("State")
+    dic["users"] = storage.count("User")
+    return jsonify(dic)#!/usr/bin/python3
+"""Creationg route for Blueprint
+"""
 from api.v1.views import app_views
-from flask import jsonify
 from models import storage
-from models.amenity import Amenity
-from models.city import City
-from models.place import Place
-from models.review import Review
-from models.state import State
-from models.user import User
-from collections import OrderedDict
-
-class_plurals = {'amenities': Amenity, 'cities': City, 'places': Place,
-                 'reviews': Review, 'states': State, 'users': User}
+from flask import jsonify
 
 
-@app_views.route('/status', strict_slashes=False)
-def status():
-    """status of api v1"""
-    status = {"status": "OK"}
-    return jsonify(status)
-
-
-@app_views.route('/stats', strict_slashes=False)
-def stats():
-    """ Returns itemized count of objects in storage by class
-
+@app_views.route('/status')
+def response():
+    """ get status ok
     """
-    stats = OrderedDict()
-    for key in sorted(class_plurals.keys()):
-        count = storage.count(class_plurals[key])
-        if count > 0:
-            stats[key] = count
-    return jsonify(stats)
+    dic = {"status": "OK"}
+    return jsonify(dic)
+
+
+@app_views.route('/stats')
+def class_counter():
+    """ get a dictionary from count method
+    """
+    dic = {}
+    dic["amenities"] = storage.count("Amenity")
+    dic["cities"] = storage.count("City")
+    dic["places"] = storage.count("Place")
+    dic["reviews"] = storage.count("Review")
+    dic["states"] = storage.count("State")
+    dic["users"] = storage.count("User")
+    return jsonify(dic)

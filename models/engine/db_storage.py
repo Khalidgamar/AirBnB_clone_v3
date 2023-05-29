@@ -44,12 +44,13 @@ class DBStorage:
         """query on the current database session"""
         new_dict = {}
         for clss in classes:
-            if cls is None or cls is classes[clss] or cls is clss:
+            # changed from if cls is None to if cls is not None
+            if cls is not None or cls is classes[clss] or cls is clss:
                 objs = self.__session.query(classes[clss]).all()
                 for obj in objs:
                     key = obj.__class__.__name__ + '.' + obj.id
-                    new_dict[key] = obj
-        return (new_dict)
+                    self.new_dict[key] = obj
+        return (self.new_dict)
 
     def new(self, obj):
         """add the object to the current database session"""
@@ -76,32 +77,24 @@ class DBStorage:
         self.__session.remove()
 
     def get(self, cls, id):
-        """ Returns specified object from database.
-
-        Args:
-            cls (<BaseModel-derived>): class of object to return
-            id (str): uuid of object to return
-
-        Returns:
-            `BaseModel`-derived object of UUID `id` from database.
-        """
-        if cls in classes.values() and id and type(id) is str:
-            return (self.__session.query(cls).get(id))
+        """A method to retrieve one object"""
+        if cls is not None and isinstance(cls, str) and id is not None and \
+                isinstance(id, str) and cls in classes:
+            cls = classes[cls]
+            result = self.__session.query(cls).filter(cls.id == id).first()
+            return result
+        return None
 
     def count(self, cls=None):
-        """ Returns count of all objects of a given type, or grand total if no
-        type given.
-
-        Args:
-            cls (<BaseModel-derived>): class of object to return
-
-        Returns:
-            Total count of all objects in database of type `cls`, or total of
-        all objects if no type given.
-        """
-        if cls is None:
-            return (len(self.all()))
-        return (len(self.__session.query(cls).all()))#!/usr/bin/python3
+        """Count number of objects in storage"""
+        total = 0
+        if isinstance(cls, str) and cls in classes:
+            cls = classes[cls]
+            total = self.__session.query(cls).count()
+        elif cls is None:
+            for cls in classes.values():
+                total += self.__session.query(cls).count()
+        return total#!/usr/bin/python3
 """
 Contains the class DBStorage
 """
@@ -147,12 +140,13 @@ class DBStorage:
         """query on the current database session"""
         new_dict = {}
         for clss in classes:
-            if cls is None or cls is classes[clss] or cls is clss:
+            # changed from if cls is None to if cls is not None
+            if cls is not None or cls is classes[clss] or cls is clss:
                 objs = self.__session.query(classes[clss]).all()
                 for obj in objs:
                     key = obj.__class__.__name__ + '.' + obj.id
-                    new_dict[key] = obj
-        return (new_dict)
+                    self.new_dict[key] = obj
+        return (self.new_dict)
 
     def new(self, obj):
         """add the object to the current database session"""
@@ -179,29 +173,21 @@ class DBStorage:
         self.__session.remove()
 
     def get(self, cls, id):
-        """ Returns specified object from database.
-
-        Args:
-            cls (<BaseModel-derived>): class of object to return
-            id (str): uuid of object to return
-
-        Returns:
-            `BaseModel`-derived object of UUID `id` from database.
-        """
-        if cls in classes.values() and id and type(id) is str:
-            return (self.__session.query(cls).get(id))
+        """A method to retrieve one object"""
+        if cls is not None and isinstance(cls, str) and id is not None and \
+                isinstance(id, str) and cls in classes:
+            cls = classes[cls]
+            result = self.__session.query(cls).filter(cls.id == id).first()
+            return result
+        return None
 
     def count(self, cls=None):
-        """ Returns count of all objects of a given type, or grand total if no
-        type given.
-
-        Args:
-            cls (<BaseModel-derived>): class of object to return
-
-        Returns:
-            Total count of all objects in database of type `cls`, or total of
-        all objects if no type given.
-        """
-        if cls is None:
-            return (len(self.all()))
-        return (len(self.__session.query(cls).all()))
+        """Count number of objects in storage"""
+        total = 0
+        if isinstance(cls, str) and cls in classes:
+            cls = classes[cls]
+            total = self.__session.query(cls).count()
+        elif cls is None:
+            for cls in classes.values():
+                total += self.__session.query(cls).count()
+        return total
